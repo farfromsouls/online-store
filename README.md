@@ -1,4 +1,4 @@
-# book-shop
+# online store
 
 ## Installation
 1) Create .env in main directory with:

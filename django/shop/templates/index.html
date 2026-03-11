@@ -1,11 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+{% load static %}
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Магазин Книг</title>
+    <title>Главная | Интернет-магазин </title>
+    <link rel="stylesheet" href="{% static 'index.css' %}">
 </head>
 <body>
-    
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo">Интернет-магазин</a>
+            <ul class="nav-menu">
+                <li><a href="#">Главная</a></li>
+                <li><a href="#">Каталог</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Контакты</a></li>
+            </ul>
+            <div class="header-icons">
+                <span>🔍</span>
+                <span>🛒</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">Рекомендуемые товары</h1>
+        <div class="product-grid">
+            
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image">
+                    <img style="max-width:100%" src="{{ product.Image.url }}" alt="{{ product.Name }}">
+                </div>
+                <div class="product-info">
+                    <div class="product-name">{{ product.Name }}</div>
+                    <div class="product-price">₽{{ product.Cost }}</div>
+                    <button class="btn-add-to-cart">В корзину</button>
+                </div>
+            </div>
+            {% endfor %}
+            
+        </div>
+    </main>
 </body>
 </html>

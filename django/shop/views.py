@@ -1,6 +1,8 @@
 from django.shortcuts import render
-from django.http.response import HttpResponse
+from .models import *
 
 
-def mainview(request):
-    return HttpResponse("Hello world")
+def MainPageView(request):
+    books = Book.objects.all()
+    data = {book.title: [] for book in books}
+    return render(request, "index.html", context=data)

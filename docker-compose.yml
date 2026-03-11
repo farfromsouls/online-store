@@ -19,6 +19,11 @@ services:
 
   web:
     build: ./django
+    command: |
+      sh -c "
+      python manage.py makemigrations shop &&
+      python manage.py migrate && 
+      python manage.py runserver 0.0.0.0:8000"
     container_name: django_app
     restart: always
     volumes:

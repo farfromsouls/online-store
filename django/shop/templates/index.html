@@ -4,16 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная | Интернет-магазин </title>
+    <title>Главная | Интернет-магазин</title>
     <link rel="stylesheet" href="{% static 'index.css' %}">
 </head>
 <body>
     <header>
         <div class="header-container">
-            <a href="#" class="logo">Интернет-магазин</a>
+            <a href="/" class="logo">Интернет-магазин</a>
             <ul class="nav-menu">
-                <li><a href="#">Главная</a></li>
-                <li><a href="#">Каталог</a></li>
+                <li><a href="/">Главная</a></li>
                 <li><a href="#">О нас</a></li>
                 <li><a href="#">Контакты</a></li>
             </ul>
@@ -31,10 +30,14 @@
             {% for product in products %}
             <div class="product-card">
                 <div class="product-image">
-                    <img style="max-width:100%" src="{{ product.Image.url }}" alt="{{ product.Name }}">
+                    <a href="product/{{ product.id }}">
+                        <img style="max-width:100%" src="{{ product.Image.url }}" alt="{{ product.Name }}">
+                    </a>
                 </div>
                 <div class="product-info">
-                    <div class="product-name">{{ product.Name }}</div>
+                    <a href="product/{{ product.id }}" style="text-decoration: none;">
+                        <div class="product-name">{{ product.Name }}</div>
+                    </a>
                     <div class="product-price">₽{{ product.Cost }}</div>
                     <button class="btn-add-to-cart">В корзину</button>
                 </div>
@@ -43,5 +46,106 @@
             
         </div>
     </main>
+    <!-- Добавляем индикатор загрузки и конец контента -->
+    <div class="loading-spinner" id="loading-spinner" style="display: none; text-align: center; padding: 20px;">
+        <div class="spinner"></div>
+        <p>Загрузка...</p>
+    </div>
+    <div id="no-more-products" style="display: none; text-align: center; padding: 20px; color: #666;">
+        Товары закончились
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let loading = false;
+        let hasNextPage = true;
+
+        async function loadMoreProducts() {
+            if (loading || !hasNextPage) return;
+            
+            loading = true;
+            document.getElementById('loading-spinner').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/load-more-products/?page=${currentPage}`);
+                const data = await response.json();
+                
+                if (data.products.length > 0) {
+                    appendProducts(data.products);
+                    currentPage++;
+                    hasNextPage = data.has_next;
+                } else {
+                    hasNextPage = false;
+                }
+                
+                if (!hasNextPage) {
+                    document.getElementById('no-more-products').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+            } finally {
+                loading = false;
+                document.getElementById('loading-spinner').style.display = 'none';
+            }
+        }
+
+        function appendProducts(products) {
+            const productGrid = document.querySelector('.product-grid');
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        <a href="product/${product.id}">
+                            <img style="max-width:100%" src="${product.Image_url}" alt="${product.Name}">
+                        </a>
+                    </div>
+                    <div class="product-info">
+                        <a href="product/${product.id}" style="text-decoration: none;">
+                            <div class="product-name">${product.Name}</div>
+                        </a>
+                        <div class="product-price">₽${product.Cost}</div>
+                        <button class="btn-add-to-cart">В корзину</button>
+                    </div>
+                `;
+                productGrid.appendChild(productCard);
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            if (loading || !hasNextPage) return;
+            
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const threshold = document.documentElement.scrollHeight - 1000; 
+            
+            if (scrollPosition >= threshold) {
+                loadMoreProducts();
+            }
+        });
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        window.addEventListener('scroll', debounce(() => {
+            if (loading || !hasNextPage) return;
+            
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const threshold = document.documentElement.scrollHeight - 1000;
+            
+            if (scrollPosition >= threshold) {
+                loadMoreProducts();
+            }
+        }, 200));
+    </script>
 </body>
 </html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'product.css' %}">
+    <title>{{ product.Name }}</title>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="/" class="logo">Интернет-магазин</a>
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Контакты</a></li>
+            </ul>
+            <div class="header-icons">
+                <span>🔍</span>
+                <span>🛒</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <div class="product-detail">
+            <div class="product-gallery">
+                <img style="max-width:100%" src="{{ product.Image.url }}" alt="{{ product.Name }}">
+            </div>
+            <div class="product-info">
+                <h1 class="product-title">{{ product.Name }}</h1>
+                <div class="product-rating">
+                    <span class="stars">Оценка: {{ product.Rating|floatformat:2 }}</span>
+                </div>
+                <div class="product-price">₽{{ product.Cost }}</div>
+                <p class="product-description">
+                    Описание:<br>
+                    {{ product.Description }}
+                </p>
+
+                <div class="product-actions">
+                    <div class="quantity-selector">
+                        <button class="quantity-btn">−</button>
+                        <input type="text" class="quantity-input" value="1" readonly>
+                        <button class="quantity-btn">+</button>
+                    </div>
+                    <button class="btn-primary">В корзину</button>
+                    <button class="btn-secondary">В избранное</button>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-headers">
+                <span class="tab-header active" data-tab="description">Описание</span>
+                <span class="tab-header" data-tab="reviews">Отзывы: {{ reviews.count }}</span>
+            </div>
+            <div class="tab-content description active">
+                
+            {{ product.Description }}
+
+            </div>
+            <div class="tab-content reviews">
+
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-author">{{ review.Author }}</span>
+                            <span class="review-rating">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= review.Rating %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        <div class="review-text">{{ review.Text }}</div>
+                    </div>
+                    {% empty %}
+                    <p class="no-reviews">Пока нет отзывов. Будьте первым!</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+        <section class="similar-products">
+            <h2 class="section-title">Похожие товары</h2>
+            <div class="product-grid">
+                
+                <div class="product-card">
+                    <div class="product-image">Фото</div>
+                    <div class="product-info-card">
+                        <div class="product-name">другой товар</div>
+                        <div class="product-price-card">цена</div>
+                        <button class="btn-add-to-cart">В корзину</button>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>О магазине</h3>
+                <ul>
+                    <li><a href="#">О нас</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Покупателям</h3>
+                <ul>
+                    <li><a href="#">Дополнительная информация</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Мы в соцсетях</h3>
+                <ul>
+                    <li><a href="#">Соцсеть</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const tabHeaders = document.querySelectorAll('.tab-header');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                tabHeaders.forEach(h => h.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                header.classList.add('active');
+                const tabId = header.getAttribute('data-tab');
+                document.querySelector(`.tab-content.${tabId}`).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

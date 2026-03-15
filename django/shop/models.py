@@ -1,6 +1,14 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.serializers.json import DjangoJSONEncoder
+from django.forms.models import model_to_dict
+
+from django_redis import get_redis_connection 
+
 from user.models import CustomUser
+
+import json 
+
 
 class Product(models.Model):
     Name = models.TextField(max_length=40)
@@ -23,6 +31,43 @@ class Product(models.Model):
             self.Rating = round(total_sum / (self.ReviewCount + 1), 2)
         self.ReviewCount += 1
         self.save()
+        
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        try:
+            key = f"product_{self.id}"
+            redis_conn = get_redis_connection('default')
+            product_dict = model_to_dict(self)
+            if 'Image' in product_dict and product_dict['Image']:
+                product_dict['Image'] = str(product_dict['Image']) 
+            
+            data = {"product": product_dict, "reviews": []}
+            
+            redis_conn.setex(key, 60, json.dumps(data, cls=DjangoJSONEncoder))
+        except Exception as e:
+            print(f"Redis cache error: {e}")
+        
+    def get_image_url(self):
+        if self.Image:
+            return self.Image.url
+        return ''
+    
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'Name': self.Name,
+            'Image': self.Image.url if self.Image else None,
+            'Cost': self.Cost,
+            'Amount': self.Amount,
+            'Available': self.Available,
+            'Description': self.Description,
+            'Rating': self.Rating,
+            'ReviewCount': self.ReviewCount
+        }
+        return data
+    
     
 class Review(models.Model):
     Product = models.ForeignKey(Product, on_delete=models.CASCADE)

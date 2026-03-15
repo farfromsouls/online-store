@@ -77,7 +77,8 @@ def ProductPageView(request, id):
     reviews = Review.objects.filter(Product=product)
     product_dict = model_to_dict(product)
     for field_name, value in product_dict.items():
-        product_dict[field_name] = value.url if value else None
+        if hasattr(value, 'url'):       
+            product_dict[field_name] = value.url if value else None
         
     reviews_list = []
     for review in reviews:

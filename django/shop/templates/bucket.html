@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина | Интернет-магазин</title>
+    <link rel="stylesheet" href="{% static 'index.css' %}">
+    <link rel="stylesheet" href="{% static 'bucket.css' %}">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="/" class="logo">Интернет-магазин</a>
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="#">О нас</a></li>
+                <li><a href="#">Контакты</a></li>
+            </ul>
+            <div class="header-icons">
+                <span>🔍</span>
+                <a href="/bucket/" style="text-decoration: none; color: inherit;"><span style="font-weight: 600;">🛒</span></a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">Корзина</h1>
+
+        <div class="bucket-container">
+            <div class="cart-items">
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        <img src="https://via.placeholder.com/100" alt="Товар">
+                    </div>
+                    <div class="cart-item-info">
+                        <a href="#" class="cart-item-name">товар 1</a>
+                        <div class="cart-item-price">₽цена</div>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn" aria-label="Уменьшить количество">−</button>
+                        <span class="quantity-value">1</span>
+                        <button class="quantity-btn" aria-label="Увеличить количество">+</button>
+                    </div>
+                    <div class="cart-item-total">₽цена</div>
+                    <button class="cart-item-remove" aria-label="Удалить товар">✕</button>
+                </div>
+
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        <img src="https://via.placeholder.com/100" alt="Товар">
+                    </div>
+                    <div class="cart-item-info">
+                        <a href="#" class="cart-item-name">товар2</a>
+                        <div class="cart-item-price">₽цена</div>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn">−</button>
+                        <span class="quantity-value">2</span>
+                        <button class="quantity-btn">+</button>
+                    </div>
+                    <div class="cart-item-total">₽цена</div>
+                    <button class="cart-item-remove">✕</button>
+                </div>
+
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        <img src="https://via.placeholder.com/100" alt="Товар">
+                    </div>
+                    <div class="cart-item-info">
+                        <a href="#" class="cart-item-name">товар3</a>
+                        <div class="cart-item-price">цена</div>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn">−</button>
+                        <span class="quantity-value">1</span>
+                        <button class="quantity-btn">+</button>
+                    </div>
+                    <div class="cart-item-total">₽цена</div>
+                    <button class="cart-item-remove">✕</button>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <h3 style="font-size: 1.4rem; margin-bottom: 1.5rem; color: #1d1d1f;">Ваш заказ</h3>
+                <div class="summary-row">
+                    <span>Товары (3)</span>
+                    <span>₽общая цена</span>
+                </div>
+                <div class="summary-row">
+                    <span>Доставка</span>
+                    <span>Бесплатно</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Итого</span>
+                    <span>₽общая цена</span>
+                </div>
+                <button class="btn-checkout">Оплатить</button>
+                <p style="font-size: 0.9rem; color: #6e6e73; margin-top: 1rem; text-align: center;">
+                    Нажимая «Оплатить», вы соглашаетесь с условиями продажи
+                </p>
+            </div>
+        </div>
+
+        <!-- пустая корзина -->
+        <!--
+        <div class="empty-cart">
+            <p>Ваша корзина пуста</p>
+            <a href="/" class="btn-add-to-cart" style="display: inline-block; width: auto; padding: 0.8rem 2rem; margin-top: 1rem;">Перейти к покупкам</a>
+        </div>
+        -->
+    </main>
+
+    <footer style="background: #ffffff; border-top: 1px solid #e8e8ed; padding: 2rem; margin-top: 3rem; text-align: center; color: #6e6e73;">
+        <p>© 2026 Интернет-магазин. Все права защищены.</p>
+    </footer>
+</body>
+</html>

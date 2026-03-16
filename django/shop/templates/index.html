@@ -38,7 +38,10 @@
                     <a href="product/{{ product.id }}" style="text-decoration: none;">
                         <div class="product-name">{{ product.Name }}</div>
                     </a>
-                    <div class="product-price">₽{{ product.Cost }}</div>
+                    <div class="price-rating">
+                        <div class="product-price">₽{{ product.Cost }}</div>
+                        <div class="product-rating">★{{ product.Rating }}</div>
+                    </div>
                     <button class="btn-add-to-cart">В корзину</button>
                 </div>
             </div>

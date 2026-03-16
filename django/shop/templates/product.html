@@ -32,7 +32,13 @@
             <div class="product-info">
                 <h1 class="product-title">{{ product.Name }}</h1>
                 <div class="product-rating">
-                    <span class="stars">Оценка: {{ product.Rating|floatformat:2 }}</span>
+                    {% if product.Rating != -1 %}
+                        <span class="stars">Оценка: 
+                            {{ product.Stars }}
+                        </span>
+                    {% else %}
+                        <span class="stars">Оценка отсутствует</span>
+                    {% endif %}
                 </div>
                 <div class="product-price">₽{{ product.Cost }}</div>
                 <p class="product-description">
@@ -67,17 +73,17 @@
 
                 <div class="reviews-list">
                     {% for review in reviews %}
-                    <div class="review-item">
-                        <div class="review-header">
-                            <span class="review-author">{{ review.Author }}</span>
-                            <span class="review-rating">
-                                {% for i in "12345"|make_list %}
-                                    {% if forloop.counter <= review.Rating %}★{% else %}☆{% endif %}
-                                {% endfor %}
-                            </span>
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="review-author">{{ review.Author }}</span>
+                                <span class="review-rating">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= review.Rating %}★{% else %}☆{% endif %}
+                                    {% endfor %}
+                                </span>
+                            </div>
+                            <div class="review-text">{{ review.Text }}</div>
                         </div>
-                        <div class="review-text">{{ review.Text }}</div>
-                    </div>
                     {% empty %}
                     <p class="no-reviews">Пока нет отзывов. Будьте первым!</p>
                     {% endfor %}

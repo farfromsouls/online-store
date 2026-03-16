@@ -35,16 +35,18 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
-        
+
         try:
             key = f"product_{self.id}"
             redis_conn = get_redis_connection('default')
             product_dict = model_to_dict(self)
-            if 'Image' in product_dict and product_dict['Image']:
-                product_dict['Image'] = str(product_dict['Image']) 
             
+            if self.Image:
+                product_dict['Image'] = self.Image.url
+            else:
+                product_dict['Image'] = None
+
             data = {"product": product_dict, "reviews": []}
-            
             redis_conn.setex(key, 60, json.dumps(data, cls=DjangoJSONEncoder))
         except Exception as e:
             print(f"Redis cache error: {e}")
@@ -67,7 +69,6 @@ class Product(models.Model):
             'ReviewCount': self.ReviewCount
         }
         return data
-    
     
 class Review(models.Model):
     Product = models.ForeignKey(Product, on_delete=models.CASCADE)

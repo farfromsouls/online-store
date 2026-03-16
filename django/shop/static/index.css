@@ -130,11 +130,21 @@ main {
     color: #1d1d1f;
 }
 
+.price-rating {
+    display: flex;
+    justify-content: space-between;
+}
 .product-price {
     font-size: 1.3rem;
     font-weight: 700;
     color: #2c3e50;
     margin-bottom: 1rem;
+}
+.product-rating {
+    left: 0px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #ddd31d;
 }
 
 .btn-add-to-cart {

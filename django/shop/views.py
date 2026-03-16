@@ -2,7 +2,7 @@ import json
 
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.forms.models import model_to_dict
 
@@ -12,20 +12,24 @@ from .models import *
 
 
 def MainPageView(request):
-    redis_conn = get_redis_connection('default') 
+    redis_conn = get_redis_connection('default')
     key = "first_by_rating"
-    print(request.user)
-    
+
+    if request.user.is_authenticated:
+        bucket = CustomUser.objects.get(username=request.user).Bucket
+    else:
+        bucket = request.session.get('bucket', {})
+
     if redis_conn.exists(key):
         ids = json.loads(redis_conn.get(key))
         products = Product.objects.filter(id__in=ids).order_by("-Rating")
-        data = {"products": products}  
-        return render(request, "index.html", context=data) 
-    
+        data = {"products": products, "bucket": bucket}
+        return render(request, "index.html", context=data)
+
     products = Product.objects.order_by("-Rating")[:16]
     ids = list(products.values_list('id', flat=True))
-    data = {"products": products}  
-    
+    data = {"products": products, "bucket": bucket}
+
     redis_conn.setex(key, 60, json.dumps(ids))
     return render(request, "index.html", context=data)
 
@@ -34,6 +38,11 @@ def LoadMoreProducts(request):
     page = int(request.GET.get('page', 1))
     key = f"products_page_{page}"
     products_per_page = 16
+    
+    if request.user.is_authenticated:
+        bucket = CustomUser.objects.get(username=request.user).Bucket
+    else:
+        bucket = request.session.get('bucket', {})
 
     if redis_conn.exists(key):
         cached_data = redis_conn.get(key)
@@ -50,11 +59,13 @@ def LoadMoreProducts(request):
 
     products_data = []
     for product in products_page:
+        product_id_str = str(product.id)
         products_data.append({
             'id': product.id,
             'Name': product.Name,
-            'Cost': str(product.Cost), 
+            'Cost': str(product.Cost),
             'Image_url': product.Image.url if product.Image else '',
+            'in_bucket': product_id_str in bucket,    
         })
 
     response_data = {
@@ -63,7 +74,7 @@ def LoadMoreProducts(request):
     }
 
     redis_conn.setex(key, 60, json.dumps(response_data))
-    return JsonResponse(response_data)
+    return JsonResponse(response_data) 
 
 def ProductPageView(request, id):
     redis_conn = get_redis_connection('default')
@@ -92,9 +103,25 @@ def ProductPageView(request, id):
             if field_name == "Author":
                 review_dict[field_name] = review.Author.username
         reviews_list.append(review_dict)
-    print(reviews_list)
-    
-    data = {"product": product_dict, "reviews": reviews_list}
+        
+    bucket = request.session.get('bucket', {})
+    data = {"product": product_dict, "reviews": reviews_list, "bucket": bucket}
 
     redis_conn.setex(key, 60, json.dumps(data, cls=DjangoJSONEncoder))
     return render(request, "product.html", context=data)
+
+def AddToBucket(request, id, amount):
+    if request.user.is_authenticated:
+        user = CustomUser.objects.get(username=request.user)
+        user.Bucket[str(id)] = amount
+        user.save()
+        return JsonResponse({"success": True})
+    
+    bucket = request.session.get('bucket', {})
+    bucket[str(id)] = amount
+    request.session['bucket'] = bucket
+    request.session.modified = True
+    return JsonResponse({"success": True})
+
+def Bucket(request):
+    return render(request, "bucket.html")

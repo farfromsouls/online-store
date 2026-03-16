@@ -129,7 +129,6 @@ main {
     margin-bottom: 0.5rem;
     color: #1d1d1f;
 }
-
 .price-rating {
     display: flex;
     justify-content: space-between;
@@ -140,8 +139,8 @@ main {
     color: #2c3e50;
     margin-bottom: 1rem;
 }
+
 .product-rating {
-    left: 0px;
     font-size: 1.3rem;
     font-weight: 600;
     color: #ddd31d;
@@ -157,12 +156,29 @@ main {
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: auto;
-    align-self: stretch;
+    width: 100%;
+    display: block; 
 }
 
 .btn-add-to-cart:hover {
     background-color: #005bbf;
+}
+
+.btn-add-to-cart.in-cart {
+    background-color: #6c757d;
+    cursor: default;
+}
+
+.btn-add-to-cart.in-cart:hover {
+    background-color: #6c757d;
+}
+
+.btn-add-to-cart {
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.btn-add-to-cart:active:not(.in-cart) {
+    transform: scale(0.95);
 }
 
 .loading-spinner {

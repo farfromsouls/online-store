@@ -18,7 +18,7 @@
             </ul>
             <div class="header-icons">
                 <span>🔍</span>
-                <span>🛒</span>
+                <span><a href="bucket/" style="text-decoration: none;">🛒</a></span>
             </div>
         </div>
     </header>
@@ -44,7 +44,15 @@
                             <div class="product-rating">★{{ product.Rating }}</div>
                         {% endif %}
                     </div>
-                    <button class="btn-add-to-cart">В корзину</button>
+                    <form method="POST" action="{% url 'add_to_bucket' product.id 1 %}" class="add-to-cart-form" id="add-to-cart-form-{{ product.id }}">
+                        {% csrf_token %}
+                        <button type="button"
+                                class="btn-add-to-cart{% if product.id|stringformat:'d' in bucket %} in-cart{% endif %}"
+                                id="btn-{{ product.id }}"
+                                onclick="addToCart({{ product.id }}, this)">
+                            {% if product.id|stringformat:'d' in bucket %}✓ В корзине{% else %}В корзину{% endif %}
+                        </button>
+                    </form>
                 </div>
             </div>
             {% endfor %}
@@ -99,6 +107,8 @@
             products.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
+                const inBucketClass = product.in_bucket ? 'in-cart' : '';
+                const buttonText = product.in_bucket ? '✓ В корзине' : 'В корзину';
                 productCard.innerHTML = `
                     <div class="product-image">
                         <a href="product/${product.id}">
@@ -110,23 +120,42 @@
                             <div class="product-name">${product.Name}</div>
                         </a>
                         <div class="product-price">₽${product.Cost}</div>
-                        <button class="btn-add-to-cart">В корзину</button>
+                        <form method="POST" action="/add_to_bucket/${product.id}_1" class="add-to-cart-form" id="add-to-cart-form-${product.id}">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${document.querySelector('[name=csrfmiddlewaretoken]').value}">
+                            <button type="button" class="btn-add-to-cart ${inBucketClass}" id="btn-${product.id}" onclick="addToCart(${product.id}, this)">${buttonText}</button>
+                        </form>
                     </div>
                 `;
                 productGrid.appendChild(productCard);
             });
         }
 
-        window.addEventListener('scroll', () => {
-            if (loading || !hasNextPage) return;
-            
-            const scrollPosition = window.innerHeight + window.scrollY;
-            const threshold = document.documentElement.scrollHeight - 1000; 
-            
-            if (scrollPosition >= threshold) {
-                loadMoreProducts();
+        function addToCart(productId, buttonElement) {
+            if (buttonElement.classList.contains('in-cart')) {
+                return; 
             }
-        });
+            buttonElement.classList.add('in-cart');
+            buttonElement.textContent = '✓ В корзине';
+            
+            fetch(`/add_to_bucket/${productId}_1`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    buttonElement.classList.remove('in-cart');
+                    buttonElement.textContent = 'В корзину';
+                    console.error('Ошибка при добавлении в корзину');
+                }
+            })
+            .catch(error => {
+                buttonElement.classList.remove('in-cart');
+                buttonElement.textContent = 'В корзину';
+                console.error('Ошибка:', error);
+            });
+        }
 
         function debounce(func, wait) {
             let timeout;

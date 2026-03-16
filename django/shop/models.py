@@ -15,8 +15,8 @@ class Product(models.Model):
     Image = models.ImageField(upload_to='products/', default='products/noimg.jpg', null=True)
     Cost = models.IntegerField(validators=[MinValueValidator(50), MaxValueValidator(500000)])
     Amount = models.IntegerField(default=0)
-    Available = models.BooleanField(default=True)
-    Description = models.TextField(default="", max_length=1000)
+    Available = models.BooleanField()
+    Description = models.TextField(default="Описание отсутствует", max_length=1000)
     Rating = models.FloatField(default=-1)
     ReviewCount = models.IntegerField(default=0)
     
@@ -34,6 +34,11 @@ class Product(models.Model):
         
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        if is_new:
+            if self.Amount > 0:
+                self.Available = True
+            else:
+                self.Available = False
         super().save(*args, **kwargs)
 
         try:
@@ -78,9 +83,9 @@ class Review(models.Model):
     
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-        super().save(*args, **kwargs)
         if is_new:
             self.Product.update_rating(self.Rating)
+        super().save(*args, **kwargs)
             
     def __str__(self):
             return f"{self.Author.username}: {self.Product}"

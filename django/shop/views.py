@@ -14,6 +14,7 @@ from .models import *
 def MainPageView(request):
     redis_conn = get_redis_connection('default') 
     key = "first_by_rating"
+    print(request.user)
     
     if redis_conn.exists(key):
         ids = json.loads(redis_conn.get(key))

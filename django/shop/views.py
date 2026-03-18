@@ -89,7 +89,7 @@ def ProductPageView(request, id):
 
     product = Product.objects.get(id=id)
     reviews = Review.objects.filter(Product=product)
-    product_dict = model_to_dict(product)
+    product_dict = product.to_dict()
     
     stars = int(product_dict["Rating"])
     product_dict["Stars"] = "★"*stars + "☆"*(5-stars)
@@ -137,10 +137,19 @@ def Bucket(request):
     total_cost = 0  
     
     for product_id, amount in bucket.items():
-        product = Product.objects.get(id=product_id)
-        product_data = model_to_dict(product)
+        redis_conn = get_redis_connection('default')
+        key = f"product_{product_id}"
+        if redis_conn.exists(key):
+            cached_product = redis_conn.get(key)
+            product_data = json.loads(cached_product)['product']
+        else:
+            product = Product.objects.get(id=product_id)
+            product_data = product.to_dict()
+        
+        print(product_data)
+            
         product_data["bucket_amount"] = amount
-        product_data["total_price"] = product.Cost * amount 
+        product_data["total_price"] = product_data["Cost"] * amount 
         total_cost += product_data["total_price"]
         data["bucket_products"].append(product_data)
     

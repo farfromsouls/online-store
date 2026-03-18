@@ -8,7 +8,9 @@ from django_redis import get_redis_connection
 from user.models import CustomUser
 
 import json 
+import os
 
+REDIS_TTL = os.environ.get("REDIS_TTL")
 
 class Product(models.Model):
     Name = models.TextField(max_length=40)
@@ -52,7 +54,7 @@ class Product(models.Model):
                 product_dict['Image'] = None
 
             data = {"product": product_dict, "reviews": []}
-            redis_conn.setex(key, 60, json.dumps(data, cls=DjangoJSONEncoder))
+            redis_conn.setex(key, REDIS_TTL, json.dumps(data, cls=DjangoJSONEncoder))
         except Exception as e:
             print(f"Redis cache error: {e}")
         

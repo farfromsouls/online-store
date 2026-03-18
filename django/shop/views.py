@@ -1,4 +1,4 @@
-import json
+import os
 
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -10,6 +10,8 @@ from django_redis import get_redis_connection
 
 from .models import *
 
+
+REDIS_TTL = os.environ.get('REDIS_TTL')
 
 def MainPageView(request):
     redis_conn = get_redis_connection('default')
@@ -30,7 +32,7 @@ def MainPageView(request):
     ids = list(products.values_list('id', flat=True))
     data = {"products": products, "bucket": bucket}
 
-    redis_conn.setex(key, 60, json.dumps(ids))
+    redis_conn.setex(key, REDIS_TTL, json.dumps(ids))
     return render(request, "index.html", context=data)
 
 def LoadMoreProducts(request):
@@ -73,7 +75,7 @@ def LoadMoreProducts(request):
         'has_next': products_page.has_next()
     }
 
-    redis_conn.setex(key, 60, json.dumps(response_data))
+    redis_conn.setex(key, REDIS_TTL, json.dumps(response_data))
     return JsonResponse(response_data) 
 
 def ProductPageView(request, id):
@@ -107,7 +109,7 @@ def ProductPageView(request, id):
     bucket = request.session.get('bucket', {})
     data = {"product": product_dict, "reviews": reviews_list, "bucket": bucket}
 
-    redis_conn.setex(key, 60, json.dumps(data, cls=DjangoJSONEncoder))
+    redis_conn.setex(key, REDIS_TTL, json.dumps(data, cls=DjangoJSONEncoder))
     return render(request, "product.html", context=data)
 
 def AddToBucket(request, id, amount):

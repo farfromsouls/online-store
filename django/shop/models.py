@@ -25,6 +25,12 @@ class Product(models.Model):
     def __str__(self):
         return self.Name
     
+    @property
+    def image_url(self):
+        if hasattr(self.Image, 'url'):
+            return self.Image.url
+        return self.Image
+    
     def update_rating(self, new_rating):
         if self.ReviewCount == 0 or self.Rating == -1:
             self.Rating = new_rating

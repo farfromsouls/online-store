@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'product.css' %}">
+    <link rel="stylesheet" href="{% static 'product_card.css' %}">
     <title>{{ product.Name }}</title>
 </head>
 <body>
@@ -27,7 +28,7 @@
         
         <div class="product-detail">
             <div class="product-gallery">
-                <img style="max-width:100%" src="{{ product.Image }}" alt="{{ product.Name }}">
+                <img style="max-width:100%" src="{{ product.image_url }}" alt="{{ product.Name }}">
             </div>
             <div class="product-info">
                 <h1 class="product-title">{{ product.Name }}</h1>
@@ -96,15 +97,8 @@
             <h2 class="section-title">Ищут сейчас:</h2>
             <div class="product-grid">
                 
-                {% for product in lookfor_now %}
-                <div class="product-card">
-                    <div class="product-image">Фото</div>
-                    <div class="product-info-card">
-                        <div class="product-name">другой товар</div>
-                        <div class="product-price-card">цена</div>
-                        <button class="btn-add-to-cart">В корзину</button>
-                    </div>
-                </div>
+                {% for item in lookfor_now %}
+                    {% include "product_card.html" with product=item %}
                 {% endfor %}
                 
             </div>

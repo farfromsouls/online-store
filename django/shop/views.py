@@ -80,46 +80,65 @@ def LoadMoreProducts(request):
 
 def ProductPageView(request, id):
     redis_conn = get_redis_connection('default')
-    keys = redis_conn.keys("*")
     key = f"product_{id}"
     
-    if key in keys:
-        cached_data = redis_conn.get(key)
-        data = json.loads(cached_data)
-        return render(request, "product.html", context=data)
-
     product = Product.objects.get(id=id)
     reviews = Review.objects.filter(Product=product)
-    product_dict = product.to_dict()
     
-    stars = int(product_dict["Rating"])
-    product_dict["Stars"] = "★"*stars + "☆"*(5-stars)
+    if request.user.is_authenticated:
+        bucket = CustomUser.objects.get(username=request.user).Bucket
+    else:
+        bucket = request.session.get('bucket', {})
     
-    for field_name, value in product_dict.items():
-        if hasattr(value, 'url'):       
-            product_dict[field_name] = value.url if value else None
-        
-    reviews_list = []
-    for review in reviews:
-        review_dict = model_to_dict(review)
-        for field_name, value in review_dict.items():
+    lookfor_now = []
+    keys = redis_conn.keys("product_*")
+    
+    for key_item in keys:
+        if key_item.decode('utf-8') != f"product_{id}":
+            try:
+                cached_data = redis_conn.get(key_item)
+                if cached_data:
+                    cached_product = json.loads(cached_data)
+                    if 'product' in cached_product:
+                        product_id = int(key_item.decode('utf-8').split('_')[1])
+                        lookfor_product = Product.objects.get(id=product_id)
+                        lookfor_now.append(lookfor_product)
+            except (Product.DoesNotExist, ValueError, json.JSONDecodeError):
+                continue
+    
+    context = {
+        'product': product,
+        'reviews': reviews,
+        'bucket': [str(k) for k in bucket.keys()],
+        'lookfor_now': lookfor_now[:4],
+    }
+    
+    try:
+        product_dict = product.to_dict()
+        for field_name, value in product_dict.items():
             if hasattr(value, 'url'):
-                review_dict[field_name] = value.url if value else None
-            if field_name == "Author":
-                review_dict[field_name] = review.Author.username
-        reviews_list.append(review_dict)
+                product_dict[field_name] = value.url if value else None
         
-    bucket = request.session.get('bucket', {})
-    data = {"product": product_dict, "reviews": reviews_list, "bucket": bucket, "lookfor_now": []}
+        reviews_list = []
+        for review in reviews:
+            review_dict = model_to_dict(review)
+            for field_name, value in review_dict.items():
+                if hasattr(value, 'url'):
+                    review_dict[field_name] = value.url if value else None
+                if field_name == "Author":
+                    review_dict[field_name] = review.Author.username
+            reviews_list.append(review_dict)
+        
+        cache_data = {
+            "product": product_dict,
+            "reviews": reviews_list,
+            "bucket": bucket,
+        }
+        redis_conn.setex(key, REDIS_TTL, json.dumps(cache_data, cls=DjangoJSONEncoder))
+    except Exception as e:
+        print(f"Error caching product {id}: {e}")
     
-    for i in keys:
-        if i.startswith(b"product_") and i[-1] != id:
-            lookfor_product = redis_conn.get(i)
-            lookfor_product = json.loads(lookfor_product)
-            data["lookfor_now"].append(lookfor_product)
-            
-    redis_conn.setex(key, REDIS_TTL, json.dumps(data, cls=DjangoJSONEncoder))
-    return render(request, "product.html", context=data)
+    return render(request, "product.html", context=context)
 
 def AddToBucket(request, id, amount):
     if request.user.is_authenticated:
@@ -140,25 +159,21 @@ def Bucket(request):
     else:
         bucket = request.session.get('bucket', {})
         
-    data = {"bucket_products": []}
+    bucket_products = []
     total_cost = 0  
     
     for product_id, amount in bucket.items():
-        redis_conn = get_redis_connection('default')
-        key = f"product_{product_id}"
-        if redis_conn.exists(key):
-            cached_product = redis_conn.get(key)
-            product_data = json.loads(cached_product)['product']
-        else:
+        try:
             product = Product.objects.get(id=product_id)
-            product_data = product.to_dict()
-        
-        print(product_data)
-            
-        product_data["bucket_amount"] = amount
-        product_data["total_price"] = product_data["Cost"] * amount 
-        total_cost += product_data["total_price"]
-        data["bucket_products"].append(product_data)
+            product.bucket_amount = amount
+            product.total_price = product.Cost * amount
+            total_cost += product.total_price
+            bucket_products.append(product)
+        except Product.DoesNotExist:
+            continue
     
-    data["total_cost"] = total_cost  
+    data = {
+        "bucket_products": bucket_products,
+        "total_cost": total_cost
+    }
     return render(request, "bucket.html", context=data)

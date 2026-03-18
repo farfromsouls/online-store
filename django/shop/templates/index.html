@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная | Интернет-магазин</title>
     <link rel="stylesheet" href="{% static 'index.css' %}">
+    <link rel="stylesheet" href="{% static 'product_card.css' %}">
 </head>
 <body>
     <header>
@@ -28,33 +29,7 @@
         <div class="product-grid">
             
             {% for product in products %}
-            <div class="product-card">
-                <div class="product-image">
-                    <a href="product/{{ product.id }}">
-                        <img style="max-width:100%" src="{{ product.Image.url }}" alt="{{ product.Name }}">
-                    </a>
-                </div>
-                <div class="product-info">
-                    <a href="product/{{ product.id }}" style="text-decoration: none;">
-                        <div class="product-name">{{ product.Name }}</div>
-                    </a>
-                    <div class="price-rating">
-                        <div class="product-price">₽{{ product.Cost }}</div>
-                        {% if product.Rating != -1 %}
-                            <div class="product-rating">★{{ product.Rating }}</div>
-                        {% endif %}
-                    </div>
-                    <form method="POST" action="{% url 'add_to_bucket' product.id 1 %}" class="add-to-cart-form" id="add-to-cart-form-{{ product.id }}">
-                        {% csrf_token %}
-                        <button type="button"
-                                class="btn-add-to-cart{% if product.id|stringformat:'d' in bucket %} in-cart{% endif %}"
-                                id="btn-{{ product.id }}"
-                                onclick="addToCart({{ product.id }}, this)">
-                            {% if product.id|stringformat:'d' in bucket %}✓ В корзине{% else %}В корзину{% endif %}
-                        </button>
-                    </form>
-                </div>
-            </div>
+                {% include "product_card.html" with product=product %}
             {% endfor %}
             
         </div>
@@ -111,12 +86,12 @@
                 const buttonText = product.in_bucket ? '✓ В корзине' : 'В корзину';
                 productCard.innerHTML = `
                     <div class="product-image">
-                        <a href="product/${product.id}">
-                            <img style="max-width:100%" src="${product.Image_url}" alt="${product.Name}">
+                        <a href="/product/${product.id}">
+                            <img style="max-width:100%" src="${product.image_url}" alt="${product.Name}">
                         </a>
                     </div>
                     <div class="product-info">
-                        <a href="product/${product.id}" style="text-decoration: none;">
+                        <a href="/product/${product.id}" style="text-decoration: none;">
                             <div class="product-name">${product.Name}</div>
                         </a>
                         <div class="product-price">₽${product.Cost}</div>

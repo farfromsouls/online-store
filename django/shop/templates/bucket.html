@@ -29,63 +29,31 @@
 
         <div class="bucket-container">
             <div class="cart-items">
+                {% for product in bucket_products %}
                 <div class="cart-item">
                     <div class="cart-item-image">
-                        <img src="https://via.placeholder.com/100" alt="Товар">
+                        <img src="{{ product.Image.url }}" alt="Товар">
                     </div>
                     <div class="cart-item-info">
-                        <a href="#" class="cart-item-name">товар 1</a>
-                        <div class="cart-item-price">₽цена</div>
+                        <a href="#" class="cart-item-name">{{ product.Name }}</a>
+                        <div class="cart-item-price">₽{{ product.Cost }}</div>
                     </div>
                     <div class="cart-item-quantity">
                         <button class="quantity-btn" aria-label="Уменьшить количество">−</button>
-                        <span class="quantity-value">1</span>
+                        <span class="quantity-value">{{ product.bucket_amount }}</span>
                         <button class="quantity-btn" aria-label="Увеличить количество">+</button>
                     </div>
-                    <div class="cart-item-total">₽цена</div>
+                    <div class="cart-item-total">₽{{ product.total_price }}</div>  
                     <button class="cart-item-remove" aria-label="Удалить товар">✕</button>
                 </div>
-
-                <div class="cart-item">
-                    <div class="cart-item-image">
-                        <img src="https://via.placeholder.com/100" alt="Товар">
-                    </div>
-                    <div class="cart-item-info">
-                        <a href="#" class="cart-item-name">товар2</a>
-                        <div class="cart-item-price">₽цена</div>
-                    </div>
-                    <div class="cart-item-quantity">
-                        <button class="quantity-btn">−</button>
-                        <span class="quantity-value">2</span>
-                        <button class="quantity-btn">+</button>
-                    </div>
-                    <div class="cart-item-total">₽цена</div>
-                    <button class="cart-item-remove">✕</button>
-                </div>
-
-                <div class="cart-item">
-                    <div class="cart-item-image">
-                        <img src="https://via.placeholder.com/100" alt="Товар">
-                    </div>
-                    <div class="cart-item-info">
-                        <a href="#" class="cart-item-name">товар3</a>
-                        <div class="cart-item-price">цена</div>
-                    </div>
-                    <div class="cart-item-quantity">
-                        <button class="quantity-btn">−</button>
-                        <span class="quantity-value">1</span>
-                        <button class="quantity-btn">+</button>
-                    </div>
-                    <div class="cart-item-total">₽цена</div>
-                    <button class="cart-item-remove">✕</button>
-                </div>
+                {% endfor %}
             </div>
 
             <div class="cart-summary">
                 <h3 style="font-size: 1.4rem; margin-bottom: 1.5rem; color: #1d1d1f;">Ваш заказ</h3>
                 <div class="summary-row">
-                    <span>Товары (3)</span>
-                    <span>₽общая цена</span>
+                    <span>Товары ({{ bucket_products|length }})</span>
+                    <span>₽{{ total_cost }}</span>
                 </div>
                 <div class="summary-row">
                     <span>Доставка</span>
@@ -93,7 +61,7 @@
                 </div>
                 <div class="summary-row total">
                     <span>Итого</span>
-                    <span>₽общая цена</span>
+                    <span>₽{{ total_cost }}</span>
                 </div>
                 <button class="btn-checkout">Оплатить</button>
                 <p style="font-size: 0.9rem; color: #6e6e73; margin-top: 1rem; text-align: center;">

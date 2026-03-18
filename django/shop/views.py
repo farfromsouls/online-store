@@ -90,8 +90,10 @@ def ProductPageView(request, id):
     product = Product.objects.get(id=id)
     reviews = Review.objects.filter(Product=product)
     product_dict = model_to_dict(product)
+    
     stars = int(product_dict["Rating"])
     product_dict["Stars"] = "★"*stars + "☆"*(5-stars)
+    
     for field_name, value in product_dict.items():
         if hasattr(value, 'url'):       
             product_dict[field_name] = value.url if value else None
@@ -126,4 +128,22 @@ def AddToBucket(request, id, amount):
     return JsonResponse({"success": True})
 
 def Bucket(request):
-    return render(request, "bucket.html")
+    if request.user.is_authenticated:
+        bucket = request.user.Bucket
+        data = {"bucket_products": []}
+        total_cost = 0  
+        
+        for product_id, amount in bucket.items():
+            product = Product.objects.get(id=product_id)
+            product_data = model_to_dict(product)
+            product_data["bucket_amount"] = amount
+            product_data["total_price"] = product.Cost * amount 
+            total_cost += product_data["total_price"]
+            data["bucket_products"].append(product_data)
+        
+        data["total_cost"] = total_cost  
+        return render(request, "bucket.html", context=data)
+
+    bucket = request.session.get('bucket', {})
+    print(bucket)
+    return render(request, "bucket.html", context=data)

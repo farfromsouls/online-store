@@ -2,7 +2,7 @@ import os
 
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.forms.models import model_to_dict
 
@@ -74,15 +74,16 @@ def LoadMoreProducts(request):
         'products': products_data,
         'has_next': products_page.has_next()
     }
-
+                
     redis_conn.setex(key, REDIS_TTL, json.dumps(response_data))
     return JsonResponse(response_data) 
 
 def ProductPageView(request, id):
     redis_conn = get_redis_connection('default')
+    keys = redis_conn.keys("*")
     key = f"product_{id}"
-
-    if redis_conn.exists(key):
+    
+    if key in keys:
         cached_data = redis_conn.get(key)
         data = json.loads(cached_data)
         return render(request, "product.html", context=data)
@@ -109,8 +110,14 @@ def ProductPageView(request, id):
         reviews_list.append(review_dict)
         
     bucket = request.session.get('bucket', {})
-    data = {"product": product_dict, "reviews": reviews_list, "bucket": bucket}
-
+    data = {"product": product_dict, "reviews": reviews_list, "bucket": bucket, "lookfor_now": []}
+    
+    for i in keys:
+        if i.startswith(b"product_") and i[-1] != id:
+            lookfor_product = redis_conn.get(i)
+            lookfor_product = json.loads(lookfor_product)
+            data["lookfor_now"].append(lookfor_product)
+            
     redis_conn.setex(key, REDIS_TTL, json.dumps(data, cls=DjangoJSONEncoder))
     return render(request, "product.html", context=data)
 
@@ -155,6 +162,3 @@ def Bucket(request):
     
     data["total_cost"] = total_cost  
     return render(request, "bucket.html", context=data)
-
-    
-    

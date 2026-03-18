@@ -130,20 +130,22 @@ def AddToBucket(request, id, amount):
 def Bucket(request):
     if request.user.is_authenticated:
         bucket = request.user.Bucket
-        data = {"bucket_products": []}
-        total_cost = 0  
+    else:
+        bucket = request.session.get('bucket', {})
         
-        for product_id, amount in bucket.items():
-            product = Product.objects.get(id=product_id)
-            product_data = model_to_dict(product)
-            product_data["bucket_amount"] = amount
-            product_data["total_price"] = product.Cost * amount 
-            total_cost += product_data["total_price"]
-            data["bucket_products"].append(product_data)
-        
-        data["total_cost"] = total_cost  
-        return render(request, "bucket.html", context=data)
-
-    bucket = request.session.get('bucket', {})
-    print(bucket)
+    data = {"bucket_products": []}
+    total_cost = 0  
+    
+    for product_id, amount in bucket.items():
+        product = Product.objects.get(id=product_id)
+        product_data = model_to_dict(product)
+        product_data["bucket_amount"] = amount
+        product_data["total_price"] = product.Cost * amount 
+        total_cost += product_data["total_price"]
+        data["bucket_products"].append(product_data)
+    
+    data["total_cost"] = total_cost  
     return render(request, "bucket.html", context=data)
+
+    
+    

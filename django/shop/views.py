@@ -55,7 +55,7 @@ def LoadMoreProducts(request):
     paginator = Paginator(all_products, products_per_page)
 
     try:
-        products_page = paginator.page(page + 1)
+        products_page = paginator.page(page)
     except (EmptyPage, PageNotAnInteger):
         return JsonResponse({'products': [], 'has_next': False})
 
@@ -159,14 +159,12 @@ def Bucket(request):
     total_cost = 0  
     
     for product_id, amount in bucket.items():
-        try:
-            product = Product.objects.get(id=product_id)
-            product.bucket_amount = amount
-            product.total_price = product.Cost * amount
-            total_cost += product.total_price
-            bucket_products.append(product)
-        except Product.DoesNotExist:
-            continue
+        product = Product.objects.get(id=product_id)
+        product.bucket_amount = amount
+        product.total_price = product.Cost * amount
+        total_cost += product.total_price
+        bucket_products.append(product)
+
     
     data = {
         "bucket_products": bucket_products,

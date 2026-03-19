@@ -43,7 +43,7 @@
     </div>
 
     <script>
-        let currentPage = 1;
+        let currentPage = 2;
         let loading = false;
         let hasNextPage = true;
 
@@ -87,7 +87,7 @@
                 productCard.innerHTML = `
                     <div class="product-image">
                         <a href="/product/${product.id}">
-                            <img style="max-width:100%" src="${product.Image.url}" alt="${product.Name}">
+                            <img style="max-width:100%" src="${product.Image_url}" alt="${product.Name}">
                         </a>
                     </div>
                     <div class="product-info">

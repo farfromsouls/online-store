@@ -46,11 +46,17 @@
                     <b>Описание:</b><br>
                     {{ product.Description }}
                 </p>
-
-                <div class="product-actions">
-                    <button class="btn-primary">В корзину</button>
-                </div>
                 
+                <form method="POST" style="margin-top: 20px;" action="{% url 'add_to_bucket' product.id 1 %}" class="add-to-cart-form" id="add-to-cart-form-{{ product.id }}">
+                    {% csrf_token %}
+                    <button type="button"
+                            class="btn-add-to-cart{% if product.id|stringformat:'d' in bucket %} in-cart{% endif %}"
+                            id="btn-{{ product.id }}"
+                            onclick="addToCart({{ product.id }}, this)">
+                        {% if product.id|stringformat:'d' in bucket %}✓ В корзине{% else %}В корзину{% endif %}
+                    </button>
+                </form>
+
             </div>
         </div>
 
@@ -135,6 +141,33 @@
                 document.querySelector(`.tab-content.${tabId}`).classList.add('active');
             });
         });
+
+        function addToCart(productId, buttonElement) {
+            if (buttonElement.classList.contains('in-cart')) {
+                return; 
+            }
+            buttonElement.classList.add('in-cart');
+            buttonElement.textContent = '✓ В корзине';
+            
+            fetch(`/add_to_bucket/${productId}_1`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    buttonElement.classList.remove('in-cart');
+                    buttonElement.textContent = 'В корзину';
+                    console.error('Ошибка при добавлении в корзину');
+                }
+            })
+            .catch(error => {
+                buttonElement.classList.remove('in-cart');
+                buttonElement.textContent = 'В корзину';
+                console.error('Ошибка:', error);
+            });
+        }
     </script>
 </body>
 </html>

@@ -35,7 +35,7 @@
                 <div class="product-rating">
                     {% if product.Rating != -1 %}
                         <span class="stars">Оценка: 
-                            {{ product.Stars }}
+                            {{ product.stars }}
                         </span>
                     {% else %}
                         <span class="stars">Оценка отсутствует</span>
@@ -93,16 +93,16 @@
             </div>
         </div>
 
+        {% if lookfor_now|length > 0 %}
         <section class="similar-products">
             <h2 class="section-title">Ищут сейчас:</h2>
-            <div class="product-grid">
-                
+            <div class="product-grid">    
                 {% for item in lookfor_now %}
                     {% include "product_card.html" with product=item %}
                 {% endfor %}
-                
             </div>
         </section>
+        {% endif %}
     </main>
 
     <footer>

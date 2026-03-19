@@ -29,24 +29,28 @@
 
         <div class="bucket-container">
             <div class="cart-items">
-                {% for product in bucket_products %}
-                <div class="cart-item">
-                    <div class="cart-item-image">
-                        <img src="{{ product.image_url }}" alt="Товар">
+                {% if bucket_products|length > 0 %}
+                    {% for product in bucket_products %}
+                    <div class="cart-item">
+                        <div class="cart-item-image">
+                            <img src="{{ product.image_url }}" alt="Товар">
+                        </div>
+                        <div class="cart-item-info">
+                            <a href="#" class="cart-item-name">{{ product.Name }}</a>
+                            <div class="cart-item-price">₽{{ product.Cost }}</div>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn" aria-label="Уменьшить количество">−</button>
+                            <span class="quantity-value">{{ product.bucket_amount }}</span>
+                            <button class="quantity-btn" aria-label="Увеличить количество">+</button>
+                        </div>
+                        <div class="cart-item-total">₽{{ product.total_price }}</div>  
+                        <button class="cart-item-remove" aria-label="Удалить товар">✕</button>
                     </div>
-                    <div class="cart-item-info">
-                        <a href="#" class="cart-item-name">{{ product.Name }}</a>
-                        <div class="cart-item-price">₽{{ product.Cost }}</div>
-                    </div>
-                    <div class="cart-item-quantity">
-                        <button class="quantity-btn" aria-label="Уменьшить количество">−</button>
-                        <span class="quantity-value">{{ product.bucket_amount }}</span>
-                        <button class="quantity-btn" aria-label="Увеличить количество">+</button>
-                    </div>
-                    <div class="cart-item-total">₽{{ product.total_price }}</div>  
-                    <button class="cart-item-remove" aria-label="Удалить товар">✕</button>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <b>В корзине ещё нет продуктов</b>
+                {% endif %}
             </div>
 
             <div class="cart-summary">

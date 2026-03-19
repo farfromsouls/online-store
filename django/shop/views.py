@@ -94,23 +94,19 @@ def ProductPageView(request, id):
     keys = redis_conn.keys("product_*")
     
     for key_item in keys:
-        if key_item.decode('utf-8') != f"product_{id}":
-            try:
-                cached_data = redis_conn.get(key_item)
-                if cached_data:
-                    cached_product = json.loads(cached_data)
-                    if 'product' in cached_product:
-                        product_id = int(key_item.decode('utf-8').split('_')[1])
-                        lookfor_product = Product.objects.get(id=product_id)
-                        lookfor_now.append(lookfor_product)
-            except (Product.DoesNotExist, ValueError, json.JSONDecodeError):
-                continue
+        if key_item.decode('utf-8') != f"product_{id}" and len(lookfor_now)<4:
+            cached_data = redis_conn.get(key_item)
+            cached_product = json.loads(cached_data)
+            if 'product' in cached_product:
+                product_id = int(key_item.decode('utf-8').split('_')[1])
+                lookfor_product = Product.objects.get(id=product_id)
+                lookfor_now.append(lookfor_product)
     
     context = {
         'product': product,
         'reviews': reviews,
         'bucket': [str(k) for k in bucket.keys()],
-        'lookfor_now': lookfor_now[:4],
+        'lookfor_now': lookfor_now,
     }
     
     try:
@@ -137,7 +133,7 @@ def ProductPageView(request, id):
         redis_conn.setex(key, REDIS_TTL, json.dumps(cache_data, cls=DjangoJSONEncoder))
     except Exception as e:
         print(f"Error caching product {id}: {e}")
-    
+    print(context)
     return render(request, "product.html", context=context)
 
 def AddToBucket(request, id, amount):

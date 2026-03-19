@@ -31,6 +31,11 @@ class Product(models.Model):
             return self.Image.url
         return self.Image
     
+    @property
+    def stars(self):
+        full_stars = round(self.Rating)
+        return full_stars*"★" + (5-full_stars)*"☆" 
+    
     def update_rating(self, new_rating):
         if self.ReviewCount == 0 or self.Rating == -1:
             self.Rating = new_rating

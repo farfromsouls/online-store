@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'product.css' %}">
     <link rel="stylesheet" href="{% static 'product_card.css' %}">
-    <link rel="icon" type="image/ico" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/ico" href="{% static 'shop.ico' %}">
     <title>{{ product.Name }}</title>
 </head>
 <body>
@@ -15,8 +15,7 @@
             <a href="/" class="logo">Интернет-магазин</a>
             <ul class="nav-menu">
                 <li><a href="/">Главная</a></li>
-                <li><a href="#">О нас</a></li>
-                <li><a href="#">Контакты</a></li>
+                <li><a href="/account/">Аккаунт</a></li>
             </ul>
             <div class="header-icons">
                 <span>🔍</span>
@@ -29,7 +28,7 @@
         
         <div class="product-detail">
             <div class="product-gallery">
-                <img style="max-width:100%" src="{{ product.image_url }}" alt="{{ product.Name }}">
+                <img style="max-width:100%; width:100%;" src="{{ product.image_url }}" alt="{{ product.Name }}">
             </div>
             <div class="product-info">
                 <h1 class="product-title">{{ product.Name }}</h1>

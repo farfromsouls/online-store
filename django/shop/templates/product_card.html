@@ -11,7 +11,7 @@
         <div class="price-rating">
             <div class="product-price">₽{{ product.Cost }}</div>
             {% if product.Rating != -1 %}
-                <div class="product-rating">★{{ product.Rating }}</div>
+                <div class="product-rating" style="color: {{ product.rating_color }};">★{{ product.Rating }}</div>
             {% endif %}
         </div>
         <form method="POST" action="{% url 'add_to_bucket' product.id 1 %}" class="add-to-cart-form" id="add-to-cart-form-{{ product.id }}">

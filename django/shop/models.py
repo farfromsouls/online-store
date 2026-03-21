@@ -36,6 +36,25 @@ class Product(models.Model):
         full_stars = round(self.Rating)
         return full_stars*"★" + (5-full_stars)*"☆" 
     
+    @property
+    def rating_color(self):
+        rating = float(self.Rating) if self.Rating else 0
+        
+        if rating >= 4.5:
+            return "#ddd31d"
+        elif rating >= 4.0:
+            return "#c9c41a"
+        elif rating >= 3.5:
+            return "#a68916"
+        elif rating >= 3.0:
+            return "#ff8c00"
+        elif rating >= 2.5:
+            return "#ff6b00"
+        elif rating >= 2.0:
+            return "#ff4500"
+        else:
+            return "#ff0000"
+    
     def update_rating(self, new_rating):
         if self.ReviewCount == 0 or self.Rating == -1:
             self.Rating = new_rating
@@ -46,17 +65,11 @@ class Product(models.Model):
         self.save()
         
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
-        if is_new:
-            if self.Amount > 0:
-                self.Available = True
-            else:
-                self.Available = False
-        super().save(*args, **kwargs)
-
-        try:
+        redis_conn = get_redis_connection('default')
+        
+        if self.Amount > 0:
+            self.Available = True
             key = f"product_{self.id}"
-            redis_conn = get_redis_connection('default')
             product_dict = model_to_dict(self)
             
             if self.Image:
@@ -66,8 +79,22 @@ class Product(models.Model):
 
             data = {"product": product_dict, "reviews": []}
             redis_conn.setex(key, REDIS_TTL, json.dumps(data, cls=DjangoJSONEncoder))
-        except Exception as e:
-            print(f"Redis cache error: {e}")
+        else:
+            redis_conn.delete(f"product_{self.id}")
+            
+            first_by_rating_key = 'first_by_rating'
+            cached_data = redis_conn.get(first_by_rating_key)
+            
+            if cached_data:
+                first_by_rating = json.loads(cached_data)
+                if isinstance(first_by_rating, list) and self.id in first_by_rating:
+                    first_by_rating.remove(self.id)
+                    redis_conn.setex(first_by_rating_key, REDIS_TTL, json.dumps(first_by_rating))
+            
+            self.Available = False
+        
+        super().save(*args, **kwargs)
+
         
     def get_image_url(self):
         if self.Image:

@@ -28,7 +28,7 @@ def MainPageView(request):
         data = {"products": products, "bucket": bucket}
         return render(request, "index.html", context=data)
 
-    products = Product.objects.order_by("-Rating")[:16]
+    products = Product.objects.filter(Available=True).order_by("-Rating")[:16]
     ids = list(products.values_list('id', flat=True))
     data = {"products": products, "bucket": bucket}
 
@@ -51,7 +51,7 @@ def LoadMoreProducts(request):
         response_data = json.loads(cached_data)
         return JsonResponse(response_data)
     
-    all_products = Product.objects.order_by("-Rating")
+    all_products = Product.objects.filter(Available=True).order_by("-Rating")
     paginator = Paginator(all_products, products_per_page)
 
     try:
@@ -164,7 +164,6 @@ def Bucket(request):
         product.total_price = product.Cost * amount
         total_cost += product.total_price
         bucket_products.append(product)
-
     
     data = {
         "bucket_products": bucket_products,

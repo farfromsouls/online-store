@@ -1,24 +1,46 @@
-# online store
+# online-store 🛍️
 
-## Starting
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-5.2-darkgreen?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-red?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8-green?style=for-the-badge&logo=elasticsearch&logoColor=white)](https://www.elastic.co/)
+[![Nginx](https://img.shields.io/badge/Nginx-1.25-green?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org/)
+[![Docker](https://img.shields.io/badge/Docker-20.10-blue?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+
+## 🚀 Starting
+Be sure you have docker installed.
+
 1) Create .env in main directory with:
 
-```dotenv
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=db
-DB_PORT=5432
+    ```dotenv
+    DB_NAME=onlinestore
+    DB_USER=postgres
+    DB_PASSWORD=
+    DB_HOST=db
+    DB_PORT=5432
 
-DJANGO_SECRET_KEY=
-DEBUG=
+    DEBUG=True
+    DJANGO_SECRET_KEY=your-secret-key-here
 
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_TTL=300
+    REDIS_HOST=redis
+    REDIS_PORT=6379
+    REDIS_TTL=300
 
-ELASTICSEARCH_HOST=elasticsearch
-ELASTICSEARCH_PORT=9200
-```
+    ELASTICSEARCH_HOST=elasticsearch
+    ELASTICSEARCH_PORT=9200
+    ```
 
-2. Check Makefile to build and run.
+2. Use these Makefile commands in project directory.
+
+## ⚙️ Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make up-b` | Build images and start all containers |
+| `make up` | Start containers (without rebuilding) |
+| `make down` | Stop all containers |
+| `make down-v` | Stop containers and remove volumes (clears PostgreSQL, Redis, static files) |
+| `make rmi` | Remove all Docker images |
+| `make fill-db` | Populate PostgreSQL with test data using Faker |
+| `make admin` | Create Django superuser |

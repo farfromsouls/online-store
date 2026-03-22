@@ -12,6 +12,9 @@ down:
 down-v:
 	docker-compose down -v
 
+rmi:
+	docker image prune -a -f
+
 fill-db:
 	docker exec -it django_app python test_populate_db.py
 

@@ -1,6 +1,6 @@
 import os
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
@@ -80,18 +80,28 @@ def LoadMoreProducts(request):
 
 def ProductPageView(request, id):
     redis_conn = get_redis_connection('default')
+    authenticated = request.user.is_authenticated
     key = f"product_{id}"
     
     product = Product.objects.get(id=id)
     reviews = Review.objects.filter(Product=product)
     
-    if request.user.is_authenticated:
+    if authenticated:
         bucket = CustomUser.objects.get(username=request.user).Bucket
     else:
         bucket = request.session.get('bucket', {})
     
     lookfor_now = []
     keys = redis_conn.keys("product_*")
+    
+    can_review = False
+    
+    if authenticated:
+        can_review = True
+        for review in reviews:
+            if review.Author.username == request.user.username:
+                can_review = False
+                break
     
     for key_item in keys:
         if key_item.decode('utf-8') != f"product_{id}" and len(lookfor_now)<4:
@@ -107,6 +117,7 @@ def ProductPageView(request, id):
         'reviews': reviews,
         'bucket': [str(k) for k in bucket.keys()],
         'lookfor_now': lookfor_now,
+        'can_review': can_review
     }
     
     try:
@@ -133,7 +144,7 @@ def ProductPageView(request, id):
         redis_conn.setex(key, REDIS_TTL, json.dumps(cache_data, cls=DjangoJSONEncoder))
     except Exception as e:
         print(f"Error caching product {id}: {e}")
-    print(context)
+        
     return render(request, "product.html", context=context)
 
 def AddToBucket(request, id, amount):
@@ -170,3 +181,20 @@ def Bucket(request):
         "total_cost": total_cost
     }
     return render(request, "bucket.html", context=data)
+
+def AddReview(request, product_id):
+    if request.method == 'POST' and request.user.is_authenticated:
+        rating = int(request.POST.get('rating', 0))
+        text = request.POST.get('text', '').strip()
+        user = CustomUser.objects.get(username=request.user.username)
+        product = Product.objects.get(id=product_id)
+        
+        if 1 <= rating <= 5 and text:
+            Review.objects.create(
+                Product=product,
+                Author=user,
+                Rating=rating,
+                Text=text
+            )
+    
+    return redirect(f'/product/{product_id}/', product_id=product_id)

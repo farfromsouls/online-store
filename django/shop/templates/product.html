@@ -90,6 +90,32 @@
                     {% endfor %}
                 </div>
 
+                {% if can_review %}
+                <div class="make_review">
+                    <h3>Оставить отзыв</h3>
+                    <form method="POST" action="{% url 'add_review' product.id %}">
+                        {% csrf_token %}
+                        
+                        <div class="review-rating-input">
+                            <label>Ваша оценка:</label>
+                            <div class="stars-input">
+                                <input type="radio" name="rating" value="5" id="star5"><label for="star5">★</label>
+                                <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
+                                <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
+                                <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
+                                <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
+                            </div>
+                        </div>
+                        
+                        <div class="review-text-input">
+                            <label for="review_text">Ваш отзыв:</label>
+                            <textarea name="text" id="review_text" rows="4" placeholder="Поделитесь впечатлениями о товаре..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-submit-review">Отправить отзыв</button>
+                    </form>
+                </div>
+                {% endif %}
             </div>
         </div>
 

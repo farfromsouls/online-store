@@ -45,7 +45,7 @@ class Product(models.Model):
         elif rating >= 4.0:
             return "#c9c41a"
         elif rating >= 3.5:
-            return "#a68916"
+            return "#d4903c"
         elif rating >= 3.0:
             return "#ff8c00"
         elif rating >= 2.5:

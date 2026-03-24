@@ -14,7 +14,7 @@
                 <div class="product-rating" style="color: {{ product.rating_color }};">★{{ product.Rating }}</div>
             {% endif %}
         </div>
-        <form method="POST" action="{% url 'add_to_bucket' product.id 1 %}" class="add-to-cart-form" id="add-to-cart-form-{{ product.id }}">
+        <form method="POST" action="/add_to_bucket/{{ product.id }}_1/" class="add-to-cart-form" id="add-to-cart-form-{{ product.id }}">
             {% csrf_token %}
             <button type="button"
                     class="btn-add-to-cart{% if product.id|stringformat:'d' in bucket %} in-cart{% endif %}"

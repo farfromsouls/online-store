@@ -29,21 +29,21 @@
         <div class="bucket-container">
             <div class="cart-items">
                 {% for product in bucket_products %}
-                <div class="cart-item">
+                <div class="cart-item" data-id="{{ product.id }}" data-price="{{ product.Cost }}">
                     <div class="cart-item-image">
                         <img src="{{ product.image_url }}" alt="Товар">
                     </div>
                     <div class="cart-item-info">
-                        <a href="#" class="cart-item-name">{{ product.Name }}</a>
+                        <a href="/product/{{ product.id }}" class="cart-item-name">{{ product.Name }}</a>
                         <div class="cart-item-price">₽{{ product.Cost }}</div>
                     </div>
                     <div class="cart-item-quantity">
-                        <button class="quantity-btn" aria-label="Уменьшить количество">−</button>
+                        <button class="quantity-btn minus" data-id="{{ product.id }}">−</button>
                         <span class="quantity-value">{{ product.bucket_amount }}</span>
-                        <button class="quantity-btn" aria-label="Увеличить количество">+</button>
+                        <button class="quantity-btn plus" data-id="{{ product.id }}">+</button>
                     </div>
                     <div class="cart-item-total">₽{{ product.total_price }}</div>  
-                    <button class="cart-item-remove" aria-label="Удалить товар">✕</button>
+                    <button class="cart-item-remove" data-id="{{ product.id }}">✕</button>
                 </div>
                 {% endfor %}
             </div>
@@ -51,8 +51,8 @@
             <div class="cart-summary">
                 <h3 style="font-size: 1.4rem; margin-bottom: 1.5rem; color: #1d1d1f;">Ваш заказ</h3>
                 <div class="summary-row">
-                    <span>Товары ({{ bucket_products|length }})</span>
-                    <span>₽{{ total_cost }}</span>
+                    <span>Товары (<span id="items-count">{{ bucket_products|length }}</span>)</span>
+                    <span id="total-cost">₽{{ total_cost }}</span>
                 </div>
                 <div class="summary-row">
                     <span>Доставка</span>
@@ -60,9 +60,13 @@
                 </div>
                 <div class="summary-row total">
                     <span>Итого</span>
-                    <span>₽{{ total_cost }}</span>
+                    <span id="grand-total">₽{{ total_cost }}</span>
                 </div>
+                {% if can_buy %}
                 <button class="btn-checkout">Оплатить</button>
+                {% else %}
+                <h2><b style="display:flex; justify-content: center;">Сначала войдите в аккаунт</b></h2>
+                {% endif %}
                 <p style="font-size: 0.9rem; color: #6e6e73; margin-top: 1rem; text-align: center;">
                     Нажимая «Оплатить», вы соглашаетесь с условиями продажи
                 </p>
@@ -80,5 +84,75 @@
     <footer style="background: #ffffff; border-top: 1px solid #e8e8ed; padding: 2rem; margin-top: 3rem; text-align: center; color: #6e6e73;">
         <p>© 2026 Интернет-магазин. Все права защищены.</p>
     </footer>
+
+    <script>
+        const csrftoken = document.cookie.match(/csrftoken=([^;]+)/)?.[1];
+        
+        function updateTotal() {
+            let total = 0;
+            let itemsCount = 0;
+            
+            document.querySelectorAll('.cart-item').forEach(item => {
+                const price = parseFloat(item.dataset.price);
+                const quantity = parseInt(item.querySelector('.quantity-value').textContent);
+                const itemTotal = price * quantity;
+                item.querySelector('.cart-item-total').textContent = `₽${itemTotal}`;
+                total += itemTotal;
+                itemsCount += quantity;
+            });
+            
+            document.getElementById('total-cost').textContent = `₽${total}`;
+            document.getElementById('grand-total').textContent = `₽${total}`;
+            document.getElementById('items-count').textContent = itemsCount;
+        }
+        
+        async function setQuantity(productId, newAmount) {
+            const response = await fetch(`/add_to_bucket/${productId}_${newAmount}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const cartItem = document.querySelector(`.cart-item[data-id="${productId}"]`);
+                if (newAmount <= 0) {
+                    cartItem.remove();
+                } else {
+                    cartItem.querySelector('.quantity-value').textContent = newAmount;
+                }
+                updateTotal();
+                
+                if (document.querySelectorAll('.cart-item').length === 0) {
+                    location.reload();
+                }
+            }
+        }
+        
+        document.querySelectorAll('.plus').forEach(btn => {
+            btn.onclick = () => {
+                const cartItem = btn.closest('.cart-item');
+                const currentAmount = parseInt(cartItem.querySelector('.quantity-value').textContent);
+                setQuantity(btn.dataset.id, currentAmount + 1);
+            };
+        });
+        
+        document.querySelectorAll('.minus').forEach(btn => {
+            btn.onclick = () => {
+                const cartItem = btn.closest('.cart-item');
+                const currentAmount = parseInt(cartItem.querySelector('.quantity-value').textContent);
+                const newAmount = currentAmount - 1;
+                setQuantity(btn.dataset.id, newAmount);
+            };
+        });
+        
+        document.querySelectorAll('.cart-item-remove').forEach(btn => {
+            btn.onclick = () => {
+                setQuantity(btn.dataset.id, 0);
+            };
+        });
+    </script>
 </body>
 </html>

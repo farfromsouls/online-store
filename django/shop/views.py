@@ -148,18 +148,10 @@ def ProductPageView(request, id):
     return render(request, "product.html", context=context)
 
 def AddToBucket(request, id, amount):
-    redis_conn = get_redis_connection("default")
-    key = f"product_{id}"
-    
-    if redis_conn.exists(key):
-        product = redis_conn.get(key)
-        product = json.loads(product)
-        if product.get("Amount") < amount:
-            return JsonResponse({"success": False})
-    else:
-        product = Product.objects.get(id=id)
-        if product.Amount < amount:
-            return JsonResponse({"success": False})
+
+    product = Product.objects.get(id=id)
+    if product.Amount < amount:
+        return JsonResponse({"success": False})
     
     if request.user.is_authenticated:
         user = CustomUser.objects.get(username=request.user)

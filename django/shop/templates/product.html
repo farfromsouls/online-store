@@ -175,7 +175,7 @@
             buttonElement.classList.add('in-cart');
             buttonElement.textContent = '✓ В корзине';
             
-            fetch(`/add_to_bucket/${productId}_1`, {
+            fetch(`/add_to_bucket/${productId}_1/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,

@@ -95,7 +95,7 @@
                             <div class="product-name">${product.Name}</div>
                         </a>
                         <div class="product-price">₽${product.Cost}</div>
-                        <form method="POST" action="/add_to_bucket/${product.id}_1" class="add-to-cart-form" id="add-to-cart-form-${product.id}">
+                        <form method="POST" action="/add_to_bucket/${product.id}_1/" class="add-to-cart-form" id="add-to-cart-form-${product.id}">
                             <input type="hidden" name="csrfmiddlewaretoken" value="${document.querySelector('[name=csrfmiddlewaretoken]').value}">
                             <button type="button" class="btn-add-to-cart ${inBucketClass}" id="btn-${product.id}" onclick="addToCart(${product.id}, this)">${buttonText}</button>
                         </form>
@@ -112,7 +112,7 @@
             buttonElement.classList.add('in-cart');
             buttonElement.textContent = '✓ В корзине';
             
-            fetch(`/add_to_bucket/${productId}_1`, {
+            fetch(`/add_to_bucket/${productId}_1/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,

@@ -9,5 +9,5 @@ urlpatterns = [
     path('bucket/', views.Bucket, name='bucket'),
     
     path('add_to_bucket/<int:id>_<int:amount>/', views.AddToBucket, name='add_to_bucket'),
-    path('add_review/<int:product_id>', views.AddReview, name='add_review')
+    path('add_review/<int:product_id>/', views.AddReview, name='add_review')
 ]

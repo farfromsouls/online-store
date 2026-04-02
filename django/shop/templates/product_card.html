@@ -20,7 +20,13 @@
                     class="btn-add-to-cart{% if product.id|stringformat:'d' in bucket %} in-cart{% endif %}"
                     id="btn-{{ product.id }}"
                     onclick="addToCart({{ product.id }}, this)">
-                {% if product.id|stringformat:'d' in bucket %}✓ В корзине{% else %}В корзину{% endif %}
+
+                {% if product.id|stringformat:'d' in bucket %}
+                    ✓ В корзине
+                {% else %}
+                    В корзину
+                {% endif %}
+                
             </button>
         </form>
     </div>

@@ -1,17 +1,15 @@
 from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
-from django.contrib.sessions.models import Session
 from .models import CustomUser
 
-# Create your views here.
+
 def Account(request):
     return render(request, "account.html")
 
 @csrf_protect
 def Login(request):
     if request.method == "POST":
-        
         username=request.POST.get("username")
         password=request.POST.get("password")
         
@@ -31,7 +29,6 @@ def Login(request):
             del request.session['bucket']
         
         login(request, user)
-        
         
     return redirect('account')
 

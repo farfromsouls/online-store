@@ -85,7 +85,6 @@ class Product(models.Model):
             redis_conn.setex(key, REDIS_TTL, json.dumps(data, cls=DjangoJSONEncoder))
         else:
             redis_conn.delete(f"product_{self.id}")
-            
             first_by_rating_key = 'first_by_rating'
             cached_data = redis_conn.get(first_by_rating_key)
             

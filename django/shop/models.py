@@ -64,6 +64,10 @@ class Product(models.Model):
         self.ReviewCount += 1
         self.save()
         
+    def update_amount(self, minus_val):
+        self.Amount = self.Amount - minus_val
+        self.save()
+        
     def save(self, *args, **kwargs):
         redis_conn = get_redis_connection('default')
         

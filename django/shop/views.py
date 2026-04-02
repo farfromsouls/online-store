@@ -211,3 +211,13 @@ def AddReview(request, product_id):
     
     return redirect(f'/product/{product_id}/', product_id=product_id)
 
+def Buy(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        user = CustomUser.objects.get(username=request.user)
+        for key, val in user.Bucket.items():
+            product = Product.objects.get(id=key)
+            product.update_amount(int(val))
+        user.Bucket = {}
+        user.save()
+    
+    return redirect(f'/bucket/')

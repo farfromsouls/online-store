@@ -63,7 +63,10 @@
                     <span id="grand-total">₽{{ total_cost }}</span>
                 </div>
                 {% if can_buy %}
-                <button class="btn-checkout">Оплатить</button>
+                <form method="POST" action="{% url 'buy' %}">
+                    {% csrf_token %}
+                    <button class="btn-checkout">Оплатить</button>
+                <form>
                 {% else %}
                 <h2><b style="display:flex; justify-content: center;">Сначала войдите в аккаунт</b></h2>
                 {% endif %}

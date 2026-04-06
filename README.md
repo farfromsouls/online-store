@@ -2,6 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.2-darkgreen?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![DRF](https://img.shields.io/badge/DRF-3.15-red?style=for-the-badge&logo=django&logoColor=white)](https://www.django-rest-framework.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-red?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8-green?style=for-the-badge&logo=elasticsearch&logoColor=white)](https://www.elastic.co/)
@@ -44,3 +45,10 @@ Be sure you have docker installed.
 | `make rmi` | Remove all Docker images |
 | `make fill-db` | Populate PostgreSQL with test data using Faker |
 | `make admin` | Create Django superuser |
+
+## 🎯 API Endpoints 
+
+**Only admin user permitted**
+
+    product/<int:id>/ - GET, PUT, PATCH, DELETE
+    products/         - GET, POST

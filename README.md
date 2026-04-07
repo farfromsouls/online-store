@@ -8,6 +8,7 @@
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8-green?style=for-the-badge&logo=elasticsearch&logoColor=white)](https://www.elastic.co/)
 [![Nginx](https://img.shields.io/badge/Nginx-1.25-green?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org/)
 [![Docker](https://img.shields.io/badge/Docker-20.10-blue?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Aiogram](https://img.shields.io/badge/aiogram-3.x-blue?style=for-the-badge&logo=telegram&logoColor=white)](https://docs.aiogram.dev)
 
 ## 🚀 Starting
 Be sure you have docker installed.

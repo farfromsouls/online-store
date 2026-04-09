@@ -11,14 +11,14 @@
 [![Aiogram](https://img.shields.io/badge/aiogram-3.x-blue?style=for-the-badge&logo=telegram&logoColor=white)](https://docs.aiogram.dev)
 
 ## 🚀 Starting
-Be sure you have docker installed.
+Make sure you have Docker installed.
 
-1) Create .env in main directory with:
+1) Create a .env file in the main directory with the following content:
 
     ```dotenv
     DB_NAME=onlinestore
     DB_USER=postgres
-    DB_PASSWORD=
+    DB_PASSWORD=yourpassword
     DB_HOST=db
     DB_PORT=5432
 
@@ -31,9 +31,11 @@ Be sure you have docker installed.
 
     ELASTICSEARCH_HOST=elasticsearch
     ELASTICSEARCH_PORT=9200
+
+    BOT_TOKEN=your-bot-token
     ```
 
-2. Use these Makefile commands in project directory.
+2. Use these Makefile commands in the project directory.
 
 ## ⚙️ Makefile Commands
 
@@ -49,7 +51,20 @@ Be sure you have docker installed.
 
 ## 🎯 API Endpoints 
 
-**Only admin user permitted**
+**Only admin users are permitted**
 
     product/<int:id>/ - GET, PUT, PATCH, DELETE
     products/         - GET, POST
+
+## ✈️ Telegram Bot
+
+**You must be logged in as an admin**
+
+You will receive notifications when someone buys products from your site.
+
+**Menu:**
+ - Add a new product
+ - Change product properties
+ - Delete a product
+ - Get the list of all products
+

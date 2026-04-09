@@ -1,6 +1,7 @@
 from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django.http.response import JsonResponse
 from .models import CustomUser
 
 
@@ -51,3 +52,15 @@ def Register(request):
 def Logout(request):
     logout(request)
     return redirect('account')
+
+@csrf_exempt
+def Auth(request):
+    if request.method == "POST":
+        login = request.POST.get("login")
+        password = request.POST.get("password")
+        admin = authenticate(request, username=login, password=password)
+        
+        if admin == None:
+            return JsonResponse({"success": False})
+        return JsonResponse({"success": True})
+    return JsonResponse({"Error": "Method not allowed"})

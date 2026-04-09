@@ -31,6 +31,25 @@ services:
       timeout: 5s
       retries: 5
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
   web:
     build: ./django
     command: >
@@ -65,6 +84,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
 
   nginx:
     image: nginx:1.25-alpine
@@ -78,7 +99,22 @@ services:
     depends_on:
       - web
 
+  aiogram:
+    build: ./aiogram
+    container_name: telegram_bot
+    restart: always
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+    volumes:
+      - ./aiogram:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
+  elasticsearch_data:
   static_volume:

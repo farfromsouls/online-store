@@ -57,8 +57,7 @@ services:
     volumes:
       - ./django:/app
       - static_volume:/app/staticfiles
-    ports:
-      - "8000:8000"
+      - media_volume:/app/media
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DB_NAME=${DB_NAME}
@@ -89,6 +88,7 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro 
       - static_volume:/static:ro
+      - media_volume:/media:ro
     depends_on:
       - web
 
@@ -103,9 +103,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
 
 volumes:
   postgres_data:
   redis_data:
   elasticsearch_data:
   static_volume:
+  media_volume:

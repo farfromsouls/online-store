@@ -6,9 +6,13 @@ while ! python -c "import socket; s=socket.socket(); s.connect(('$DB_HOST', int(
 done
 echo "Database started"
 
-python manage.py makemigrations user
-python manage.py makemigrations shop
+if [ "$DEBUG" = "1" ]; then
+    python manage.py makemigrations
+fi
 python manage.py migrate
 python manage.py collectstatic --noinput
+
+chmod -R 755 /app/staticfiles
+chmod -R 755 /app/media
 
 exec "$@"

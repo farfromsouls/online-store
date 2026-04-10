@@ -210,13 +210,29 @@ def AddReview(request, product_id):
     
     return redirect(f'/product/{product_id}/', product_id=product_id)
 
+
+
 def Buy(request):
     if request.method == 'POST' and request.user.is_authenticated:
         user = request.user
-        for key, val in user.Bucket.items():
-            product = Product.objects.get(id=key)
-            product.update_amount(int(val))
-        user.Bucket = {}
-        user.save()
+        bucket_items = user.Bucket.items()  
+        
+        if bucket_items:
+            notification = {
+                'user': user.username,
+                'items': dict(bucket_items),  
+            }
+            
+            
+            redis_queue = get_redis_connection("queue")
+            redis_queue.rpush("bot:notifications", json.dumps(notification))
+                
+            
+            for product_id, qty in bucket_items:
+                product = Product.objects.get(id=int(product_id))
+                product.update_amount(int(qty)) 
+            
+            user.Bucket = {}
+            user.save()
     
-    return redirect(f'/bucket/')
+    return redirect('/bucket/')

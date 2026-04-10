@@ -1,1 +1,5 @@
 .env
+venv
+__pycache__
+migrations
+media/products/*.png

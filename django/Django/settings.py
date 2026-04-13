@@ -2,11 +2,13 @@ from pathlib import Path
 import os
 
 
+REDIS_TTL = os.environ.get("REDIS_TTL")
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = os.environ.get('DEBUG', '0') == '1'
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'web', 'web:8000', '*']
+ALLOWED_HOSTS = ['*']
 
 MEDIA_URL = '/media/'              
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

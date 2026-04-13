@@ -6,11 +6,10 @@ from django.forms.models import model_to_dict
 from django_redis import get_redis_connection 
 
 from user.models import CustomUser
+from Django.settings import REDIS_TTL
 
-import json 
-import os
+import json
 
-REDIS_TTL = os.environ.get("REDIS_TTL")
 
 class Product(models.Model):
     Name = models.TextField(max_length=40)
@@ -73,7 +72,7 @@ class Product(models.Model):
         
         if self.Amount > 0:
             self.Available = True
-            key = f"product_{self.id}"
+            key = f"product_{id}"
             product_dict = model_to_dict(self)
             
             if self.Image:
@@ -81,7 +80,11 @@ class Product(models.Model):
             else:
                 product_dict['Image'] = None
 
-            data = {"product": product_dict, "reviews": []}
+            data = {
+                "amount": self.Amount,
+                "product": product_dict,
+                "reviews": []
+            }
             redis_conn.setex(key, REDIS_TTL, json.dumps(data, cls=DjangoJSONEncoder))
         else:
             redis_conn.delete(f"product_{self.id}")

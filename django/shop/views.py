@@ -8,7 +8,8 @@ from django.forms.models import model_to_dict
 
 from django_redis import get_redis_connection
 
-from .models import Product, Review, REDIS_TTL
+from Django.settings import REDIS_TTL
+from .models import Product, Review
 
 
 def get_bucket(request):
@@ -131,14 +132,16 @@ def ProductPageView(request, id):
 def AddToBucket(request, id, amount):
     redis_conn = get_redis_connection('default')
     key = f"product_{id}"
+    
     if redis_conn.exists(key):
-        product = json.loads(redis_conn.get(key))
-        if product["amount"] < int(amount):
-            return JsonResponse({"success": False})
+        product_data = json.loads(redis_conn.get(key))
+        available = product_data["amount"]
     else:
-        product = Product.objects.get(id=id)
-        if product.Amount < amount:
-            return JsonResponse({"success": False})
+        product_obj = Product.objects.get(id=id)
+        available = product_obj.Amount
+        
+    if available < amount:
+        return JsonResponse({"success": False})
     
     if request.user.is_authenticated:
         user = request.user
@@ -209,8 +212,6 @@ def AddReview(request, product_id):
     redis_conn.delete(f"product_{product_id}")
     
     return redirect(f'/product/{product_id}/', product_id=product_id)
-
-
 
 def Buy(request):
     if request.method == 'POST' and request.user.is_authenticated:

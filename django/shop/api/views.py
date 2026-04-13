@@ -2,7 +2,8 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from shop.models import Product, REDIS_TTL
+from shop.models import Product
+from Django.settings import REDIS_TTL
 
 from django_redis import get_redis_connection
 

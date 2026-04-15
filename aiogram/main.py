@@ -1,14 +1,24 @@
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters.command import Command
+
 import asyncio
 import logging
 import json
 import os
-import sqlite3
 import requests
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters.command import Command
+
 import redis.asyncio as redis
+import psycopg2
+
 
 TOKEN = os.getenv("BOT_TOKEN")
+
+NAME = os.environ.get('DB_NAME')
+USER = os.environ.get('DB_USER')
+PASSWORD = os.environ.get('DB_PASSWORD')
+HOST = os.environ.get('DB_HOST')
+PORT = os.environ.get('DB_PORT')
+
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = int(os.getenv("REDIS_PORT"))
 REDIS_DB = 1
@@ -16,14 +26,20 @@ QUEUE_KEY = "bot:notifications"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
 
-db_path = 'data.sqlite3'
-conn = sqlite3.connect(db_path, check_same_thread=False)
+conn = psycopg2.connect(
+    dbname=NAME,
+    user=USER,
+    password=PASSWORD,
+    host=HOST,
+    port=PORT
+)
 cursor = conn.cursor()
+
+
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS Users (
+CREATE TABLE IF NOT EXISTS telegram_admins (
     id INTEGER PRIMARY KEY,
     last_message TEXT
 )
@@ -31,15 +47,15 @@ CREATE TABLE IF NOT EXISTS Users (
 conn.commit()
 
 async def is_admin(uid: int) -> bool:
-    cursor.execute("SELECT id FROM Users WHERE id=?", (uid,))
+    cursor.execute(f"SELECT id FROM telegram_admins WHERE id={uid}")
     return cursor.fetchone() is not None
 
 async def add_admin(uid: int):
-    cursor.execute("INSERT OR IGNORE INTO Users (id) VALUES (?)", (uid,))
+    cursor.execute(f"INSERT INTO telegram_admins (id) VALUES ({uid}) ON CONFLICT (id) DO NOTHING")
     conn.commit()
 
 async def get_all_admins():
-    cursor.execute("SELECT id FROM Users")
+    cursor.execute("SELECT id FROM telegram_admins")
     return [row[0] for row in cursor.fetchall()]
 
 async def auth(user_input):
@@ -112,7 +128,10 @@ async def handler(message: types.Message):
 
 async def main():
     asyncio.create_task(redis_listener())
-    await dp.start_polling(bot)
+    try:
+        await dp.start_polling(bot)
+    except:
+        print("Error connecting to telegram API")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

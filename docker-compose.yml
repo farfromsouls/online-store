@@ -39,6 +39,7 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - logger.level=warn
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -100,6 +101,11 @@ services:
       - BOT_TOKEN=${BOT_TOKEN}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
     volumes:
       - ./aiogram:/app
     depends_on:

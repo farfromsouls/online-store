@@ -224,10 +224,8 @@ def Buy(request):
                 'items': dict(bucket_items),  
             }
             
-            
             redis_queue = get_redis_connection("queue")
             redis_queue.rpush("bot:notifications", json.dumps(notification))
-                
             
             for product_id, qty in bucket_items:
                 product = Product.objects.get(id=int(product_id))

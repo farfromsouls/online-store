@@ -3,12 +3,9 @@ import json
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
-from django.core.serializers.json import DjangoJSONEncoder
-from django.forms.models import model_to_dict
 
 from django_redis import get_redis_connection
 
-from Django.settings import REDIS_TTL
 from .models import Product, Review
 
 
@@ -18,17 +15,9 @@ def get_bucket(request):
     return request.session.get('bucket', {})
 
 def MainPageView(request):
-    redis_conn = get_redis_connection('default')
-    key = "first_by_rating"
     bucket = get_bucket(request)
 
-    if redis_conn.exists(key):
-        ids = json.loads(redis_conn.get(key))
-        products = Product.objects.filter(id__in=ids).order_by("-Rating")
-    else:
-        products = Product.objects.filter(Available=True).order_by("-Rating")[:16]
-        ids = list(products.values_list('id', flat=True))
-        redis_conn.setex(key, REDIS_TTL, json.dumps(ids))
+    products = Product.objects.filter(Available=True).order_by("-Rating")[:16]
     
     data = {"products": products, "bucket": bucket}
     return render(request, "index.html", context=data)
@@ -65,16 +54,13 @@ def LoadMoreProducts(request):
     return JsonResponse(response_data) 
 
 def ProductPageView(request, id):
-    redis_conn = get_redis_connection('default')
     authenticated = request.user.is_authenticated
-    key = f"product_{id}"
     
     bucket = get_bucket(request)
     product = Product.objects.get(id=id)
     reviews = Review.objects.filter(Product=product).select_related('Author')
     
     lookfor_now = []
-    keys = redis_conn.keys("product_*")
     can_review = False
     
     if authenticated:
@@ -84,15 +70,6 @@ def ProductPageView(request, id):
                 can_review = False
                 break
     
-    for key_item in keys:
-        if key_item.decode('utf-8') != f"product_{id}" and len(lookfor_now)<4:
-            cached_data = redis_conn.get(key_item)
-            cached_product = json.loads(cached_data)
-            if 'product' in cached_product:
-                product_id = int(key_item.decode('utf-8').split('_')[1])
-                lookfor_product = Product.objects.get(id=product_id)
-                lookfor_now.append(lookfor_product)
-    
     response_data = {
         'product': product,
         'reviews': reviews,
@@ -100,45 +77,13 @@ def ProductPageView(request, id):
         'lookfor_now': lookfor_now,
         'can_review': can_review
     }
-    
-    try:
-        product_dict = product.to_dict()
-        for field_name, value in product_dict.items():
-            if hasattr(value, 'url'):
-                product_dict[field_name] = value.url if value else None
-        
-        reviews_list = []
-        for review in reviews:
-            review_dict = model_to_dict(review)
-            for field_name, value in review_dict.items():
-                if hasattr(value, 'url'):
-                    review_dict[field_name] = value.url if value else None
-                if field_name == "Author":
-                    review_dict[field_name] = review.Author.username
-            reviews_list.append(review_dict)
-        
-        cache_data = {
-            "amount": product.Amount,
-            "product": product_dict,
-            "reviews": reviews_list,
-        }
-        redis_conn.setex(key, REDIS_TTL, json.dumps(cache_data, cls=DjangoJSONEncoder))
-        
-    except Exception as e:
-        print(f"Error caching product {id}: {e}")
         
     return render(request, "product.html", context=response_data)
 
 def AddToBucket(request, id, amount):
-    redis_conn = get_redis_connection('default')
-    key = f"product_{id}"
-    
-    if redis_conn.exists(key):
-        product_data = json.loads(redis_conn.get(key))
-        available = product_data["amount"]
-    else:
-        product_obj = Product.objects.get(id=id)
-        available = product_obj.Amount
+
+    product_obj = Product.objects.get(id=id)
+    available = product_obj.Amount
         
     if available < amount:
         return JsonResponse({"success": False})
@@ -207,9 +152,6 @@ def AddReview(request, product_id):
         else:
             old_review = Review.objects.filter(Product=product, Author=user)
             old_review.update(Text=text, Rating=rating)
-            
-    redis_conn = get_redis_connection('default')
-    redis_conn.delete(f"product_{product_id}")
     
     return redirect(f'/product/{product_id}/', product_id=product_id)
 
